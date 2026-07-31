@@ -20,6 +20,7 @@ public class CountThreadsMain {
         thread1.run();
         thread2.run();
         thread3.run();
+
     }
 
 }
