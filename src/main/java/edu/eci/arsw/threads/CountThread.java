@@ -19,7 +19,7 @@ public class CountThread extends Thread {
     }
 
     @Override
-    public void start() {
+    public void run() {
         for (int i = a; i <= b; i++) {
             System.out.println(i);
         }
