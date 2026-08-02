@@ -3,7 +3,7 @@
 ### Arquitecturas de Software - ARSW
 ## Ejercicio Introducción al paralelismo - Hilos - Caso BlackListSearch
 
-### Nombres: Juan Melo - Diego Rozo
+### Nombres: Juan Melo - Diego Rozo.
 ### Dependencias:
 ####   Lecturas:
 *  [Threads in Java](http://beginnersbook.com/2013/03/java-threads/)  (Hasta 'Ending Threads')
