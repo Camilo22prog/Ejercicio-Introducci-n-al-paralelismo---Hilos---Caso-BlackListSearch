@@ -30,7 +30,6 @@ public class HostBlackListsValidator {
      * @return  Blacklists numbers where the given host's IP address was found.
      */
     public List<Integer> checkHost(String ipaddress){
-
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
 
         int ocurrencesCount=0;

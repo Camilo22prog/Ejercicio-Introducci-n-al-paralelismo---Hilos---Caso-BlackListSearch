@@ -5,18 +5,102 @@
  */
 package edu.eci.arsw.blacklistvalidator;
 
-import java.util.List;
+import java.util.Scanner;
 
 /**
  *
  * @author hcadavid
  */
 public class Main {
-    
-    public static void main(String a[]){
-        HostBlackListsValidator hblv=new HostBlackListsValidator();
-        List<Integer> blackListOcurrences=hblv.checkHost("202.24.34.55", 5);
-        System.out.println("The host was found in the following blacklists:"+blackListOcurrences);
+
+    public static void main(String[] args) {
+        String initialIp;
+        String finalIp;
+        int threadsCount;
+
+        if (args.length >= 3) {
+            initialIp = args[0];
+            finalIp = args[1];
+            threadsCount = Integer.parseInt(args[2]);
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            initialIp = readIp(scanner, "Ingrese la IP inicial: ");
+            finalIp = readIp(scanner, "Ingrese la IP final: ");
+            threadsCount = readPositiveInt(scanner, "Ingrese el numero de hilos: ");
+            scanner.close();
+        }
+
+        validateIpRange(initialIp, finalIp, threadsCount);
     }
-    
+
+    private static void validateIpRange(String initialIp, String finalIp, int threadsCount) {
+        if (threadsCount <= 0) {
+            throw new IllegalArgumentException("El numero de hilos debe ser mayor que cero.");
+        }
+
+        long startIp = HostBlackListsValidatorThread.ipToNumber(initialIp);
+        long endIp = HostBlackListsValidatorThread.ipToNumber(finalIp);
+
+        if (endIp < startIp) {
+            throw new IllegalArgumentException("La IP final debe ser mayor o igual a la IP inicial.");
+        }
+
+        long totalIps = endIp - startIp + 1;
+        int actualThreadsCount = (int) Math.min(threadsCount, totalIps);
+        HostBlackListsValidatorThread[] threads = new HostBlackListsValidatorThread[actualThreadsCount];
+        long baseSize = totalIps / actualThreadsCount;
+        long remainder = totalIps % actualThreadsCount;
+        long currentStart = startIp;
+
+        for (int i = 0; i < actualThreadsCount; i++) {
+            long currentSize = baseSize + (i < remainder ? 1 : 0);
+            long currentEnd = currentStart + currentSize - 1;
+            System.out.println("Hilo " + (i + 1) + ": Rango ["
+                    + HostBlackListsValidatorThread.numberToIp(currentStart) + ".."
+                    + HostBlackListsValidatorThread.numberToIp(currentEnd) + "]");
+
+            threads[i] = new HostBlackListsValidatorThread(currentStart, currentEnd);
+            threads[i].start();
+            currentStart = currentEnd + 1;
+        }
+
+        for (HostBlackListsValidatorThread thread : threads) {
+            try {
+                thread.join();
+                System.out.println(thread.getName() + " valido " + thread.getCheckedIpCount() + " IP(s).");
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("La validacion del rango de IPs fue interrumpida.", ex);
+            }
+        }
+    }
+
+    private static String readIp(Scanner scanner, String message) {
+        while (true) {
+            System.out.print(message);
+            String ipAddress = scanner.nextLine();
+            try {
+                HostBlackListsValidatorThread.ipToNumber(ipAddress);
+                return ipAddress;
+            } catch (IllegalArgumentException ex) {
+                System.out.println("Error: " + ex.getMessage());
+            }
+        }
+    }
+
+    private static int readPositiveInt(Scanner scanner, String message) {
+        while (true) {
+            System.out.print(message);
+            String value = scanner.nextLine();
+            try {
+                int number = Integer.parseInt(value);
+                if (number > 0) {
+                    return number;
+                }
+                System.out.println("Error: El numero debe ser mayor que cero.");
+            } catch (NumberFormatException ex) {
+                System.out.println("Error: Debe ingresar un numero entero valido.");
+            }
+        }
+    }
 }
