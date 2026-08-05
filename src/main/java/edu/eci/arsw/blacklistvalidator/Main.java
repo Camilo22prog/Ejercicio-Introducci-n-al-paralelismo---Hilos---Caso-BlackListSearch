@@ -18,6 +18,21 @@ public class Main {
         String finalIp;
         int threadsCount;
 
+        if (args.length > 0 && "benchmark".equalsIgnoreCase(args[0])) {
+            if (args.length >= 3) {
+                initialIp = args[1];
+                finalIp = args[2];
+            } else {
+                Scanner scanner = new Scanner(System.in);
+                initialIp = readIp(scanner, "Ingrese la IP inicial: ");
+                finalIp = readIp(scanner, "Ingrese la IP final: ");
+                scanner.close();
+            }
+
+            runPerformanceExperiments(initialIp, finalIp);
+            return;
+        }
+
         if (args.length >= 3) {
             initialIp = args[0];
             finalIp = args[1];
@@ -31,6 +46,36 @@ public class Main {
         }
 
         validateIpRange(initialIp, finalIp, threadsCount);
+    }
+
+    private static void runPerformanceExperiments(String initialIp, String finalIp) {
+        long startIp = HostBlackListsValidatorThread.ipToNumber(initialIp);
+        long endIp = HostBlackListsValidatorThread.ipToNumber(finalIp);
+
+        if (endIp < startIp) {
+            throw new IllegalArgumentException("La IP final debe ser mayor o igual a la IP inicial.");
+        }
+
+        long totalIps = endIp - startIp + 1;
+        if (totalIps < 100) {
+            throw new IllegalArgumentException("El rango debe tener al menos 100 IPs para la prueba de 100 hilos.");
+        }
+
+        int cores = Runtime.getRuntime().availableProcessors();
+        int[] threadCounts = {1, cores, cores * 2, 50, 100};
+
+        System.out.println("Nucleos disponibles: " + cores);
+        System.out.println("Rango evaluado: " + initialIp + ".." + finalIp);
+
+        for (int threadCount : threadCounts) {
+            System.out.println("\nPrueba con " + threadCount + " hilo(s):");
+            long startTime = System.nanoTime();
+            validateIpRange(initialIp, finalIp, threadCount);
+            long endTime = System.nanoTime();
+            double elapsedMilliseconds = (endTime - startTime) / 1_000_000.0;
+
+            System.out.printf("Resultado: %d hilo(s), %.3f ms%n", threadCount, elapsedMilliseconds);
+        }
     }
 
     private static void validateIpRange(String initialIp, String finalIp, int threadsCount) {
