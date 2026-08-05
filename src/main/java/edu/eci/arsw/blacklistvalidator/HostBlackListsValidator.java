@@ -61,7 +61,6 @@ public class HostBlackListsValidator {
         return blackListOcurrences;
     }
 
-
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
 
 

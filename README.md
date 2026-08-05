@@ -61,6 +61,10 @@ Para 'refactorizar' este código, y hacer que explote la capacidad multi-núcleo
 
 La estrategia de paralelismo antes implementada es ineficiente en ciertos casos, pues la búsqueda se sigue realizando aún cuando los N hilos (en su conjunto) ya hayan encontrado el número mínimo de ocurrencias requeridas para reportar al servidor como malicioso. Cómo se podría modificar la implementación para minimizar el número de consultas en estos casos?, qué elemento nuevo traería esto al problema?
 
+Respuesta: Esta implementacion se puede mejorar si los hilos pudieran compartir un contador de las ips que han encotrado, si cada uno de los hilos pudiera aumentar un contador con las ips que esta encontrando en la base de datos de lista negra de ips se podría activar un trigger que que la ip ya ha sido encontrado un numero determinado de veces y que ya se puede reportar como maliciosoa para no tener que hacer la misma bisqueda mas veces, lo que drenaria recursos y tomaria mucho mas tiempo y asi los demas hilos pueden revisar el trigger, ver que ya tenemos unas apariciones de las ips en la lista y no tendrian que hacer de nuevo la busqueda. 
+
+Ahora el problema seria coordinar los hilos,  como lo vimos en clase, esto podría condicionar a condiciones de carrera por el uso de la variable de todos los hilos, podriamos usar un mecanismo seguro como AtomicInteger para asegurarnos de que no sea modificado el contador una vez se le pone la ip que tiene un numero determinado de coincidencias, tambien algun hilo podria hacer busquedas adicionales anted de detectar la detencion de la busqueda, por la prioridad de las ejecuciones.
+
 **Parte III - Evaluación de Desempeño**
 
 A partir de lo anterior, implemente la siguiente secuencia de experimentos para realizar las validación de direcciones IP dispersas (por ejemplo 202.24.34.55), tomando los tiempos de ejecución de los mismos (asegúrese de hacerlos en la misma máquina):
