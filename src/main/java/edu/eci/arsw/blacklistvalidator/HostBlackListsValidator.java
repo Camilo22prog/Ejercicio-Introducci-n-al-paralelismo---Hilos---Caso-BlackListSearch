@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.eci.arsw.blacklistvalidator;
 
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
@@ -17,7 +12,8 @@ import java.util.logging.Logger;
  */
 public class HostBlackListsValidator {
 
-    private static final int BLACK_LIST_ALARM_COUNT=5;
+    private static final int BLACK_LIST_ALARM_COUNT = 5;
+    private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
 
     /**
      * Check the given host's IP address in all the available black lists,
@@ -26,43 +22,60 @@ public class HostBlackListsValidator {
      * The search is not exhaustive: When the number of occurrences is equal to
      * BLACK_LIST_ALARM_COUNT, the search is finished, the host reported as
      * NOT Trustworthy, and the list of the five blacklists returned.
+     *
      * @param ipaddress suspicious host's IP address.
-     * @return  Blacklists numbers where the given host's IP address was found.
+     * @param N         number of threads to use.
+     * @return Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress){
-        LinkedList<Integer> blackListOcurrences=new LinkedList<>();
+    public List<Integer> checkHost(String ipaddress, int N) {
+        LinkedList<Integer> blackListOccurrences = new LinkedList<>();
+        int occurrencesCount = 0;
+        HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
+        int checkedListsCount = 0;
 
-        int ocurrencesCount=0;
+        int totalServers = skds.getRegisteredServersCount();
+        HostBlackListsValidatorThread[] threads = new HostBlackListsValidatorThread[N];
 
-        HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
+        int baseSize = totalServers / N;
+        int remainder = totalServers % N;
+        int currentStart = 0;
 
-        int checkedListsCount=0;
+        // Crear e iniciar hilos
+        for (int i = 0; i < N; i++) {
+            int currentSize = baseSize + (i < remainder ? 1 : 0);
+            int currentEnd = currentStart + currentSize - 1;
 
-        for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
-            checkedListsCount++;
+            threads[i] = new HostBlackListsValidatorThread(ipaddress, currentStart, currentEnd);
+            threads[i].start();
+            currentStart = currentEnd + 1;
+        }
 
-            if (skds.isInBlackListServer(i, ipaddress)){
-
-                blackListOcurrences.add(i);
-
-                ocurrencesCount++;
+        // Esperar a que terminen y recolectar resultados
+        for (int i = 0; i < N; i++) {
+            try {
+                threads[i].join();
+                checkedListsCount += threads[i].getCheckedServersCount();
+                
+                for (Integer serverId : threads[i].getOccurrences()) {
+                    if (occurrencesCount < BLACK_LIST_ALARM_COUNT) {
+                        blackListOccurrences.add(serverId);
+                        occurrencesCount++;
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOG.log(Level.SEVERE, "Thread was interrupted", e);
             }
         }
 
-        if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
+        if (occurrencesCount >= BLACK_LIST_ALARM_COUNT) {
             skds.reportAsNotTrustworthy(ipaddress);
-        }
-        else{
+        } else {
             skds.reportAsTrustworthy(ipaddress);
         }
 
-        LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{checkedListsCount, skds.getRegisteredServersCount()});
+        LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{checkedListsCount, totalServers});
 
-        return blackListOcurrences;
+        return blackListOccurrences;
     }
-
-    private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
-
-
-
 }
