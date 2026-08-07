@@ -70,14 +70,63 @@ Ahora el problema seria coordinar los hilos,  como lo vimos en clase, esto podr�
 A partir de lo anterior, implemente la siguiente secuencia de experimentos para realizar las validación de direcciones IP dispersas (por ejemplo 202.24.34.55), tomando los tiempos de ejecución de los mismos (asegúrese de hacerlos en la misma máquina):
 
 1. Un solo hilo.
+Prueba con 1 hilo(s):
+ago 06, 2026 6:28:21 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+ago 06, 2026 6:28:21 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 1 hilo(s), 116757,695 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+![Prueba_1_hilo](image.png)
 2. Tantos hilos como núcleos de procesamiento (haga que el programa determine esto haciendo uso del [API Runtime](https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html)).
+Prueba con 12 hilo(s):
+ago 06, 2026 6:28:34 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+ago 06, 2026 6:28:34 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 12 hilo(s), 9632,652 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+![Prueba_12_hilos](image-1.png)
 3. Tantos hilos como el doble de núcleos de procesamiento.
+Prueba con 24 hilo(s):
+ago 06, 2026 6:28:42 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+ago 06, 2026 6:28:42 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 24 hilo(s), 4802,170 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+![Prueba_24_hilos](image-2.png)
 4. 50 hilos.
+Prueba con 50 hilo(s):
+ago 06, 2026 6:28:47 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+ago 06, 2026 6:28:47 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 50 hilo(s), 2379,141 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+![Prueba_50_hilos]({F16EFFCB-A0E4-4508-8DC4-4A92135231CF}.png)
 5. 100 hilos.
-
+Prueba con 100 hilo(s):
+ago 06, 2026 6:28:51 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade repoago 06, 2026 6:28:51 P.?M. edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+rtAsNotTrustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+INFO: HOST 202.24.34.55 Reported as NOT trustworthy
+ago 06, 2026 6:28:51 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost      
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 100 hilo(s), 1189,497 ms
+ago 06, 2026 6:28:51 P.?M. edu.eci.arsw.blacklistvalidator.HostBlackListsValidator checkHost      
+INFO: Checked Black Lists:80.000 of 80.000
+Resultado: 100 hilo(s), 1189,497 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+Resultado: 100 hilo(s), 1189,497 ms
+Pausando 3 segundos para visualizacion en jVisualVM...
+Pausando 3 segundos para visualizacion en jVisualVM...
+![Prueba_100_Hilos](image-4.png)
 Al iniciar el programa ejecute el monitor jVisualVM, y a medida que corran las pruebas, revise y anote el consumo de CPU y de memoria en cada caso. ![](img/jvisualvm.png)
 
 Con lo anterior, y con los tiempos de ejecución dados, haga una gráfica de tiempo de solución vs. número de hilos. Analice y plantee hipótesis con su compañero para las siguientes preguntas (puede tener en cuenta lo reportado por jVisualVM):
+![Grafica_tiempo_vs_hilos]({753179EE-4694-4DD8-9E54-B1EE0402460A}.png)
 
 **Parte IV - Ejercicio Black List Search**
 
